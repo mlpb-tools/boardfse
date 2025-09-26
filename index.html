@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord FSE+ - Mission Locale Pays Basque</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        .mlpb-orange { background-color: #FF6B35; }
+        .mlpb-green { background-color: #4CAF50; }
+        .mlpb-blue { background-color: #2196F3; }
+        .mlpb-pink { background-color: #E91E63; }
+        .mlpb-purple { background-color: #9C27B0; }
+        .mlpb-brick { background-color: #8D4E3C; }
+        
+        .tab-active {
+            background: linear-gradient(135deg, #FF6B35, #E91E63);
+            color: white;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .kanban-column {
+            min-height: 400px;
+        }
+        
+        .kanban-item {
+            cursor: move;
+        }
+        
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="bg-white shadow-lg border-b-4 border-orange-500">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 mlpb-orange rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Tableau de bord FSE+</h1>
+                        <p class="text-sm text-gray-600">Mission Locale Pays Basque</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-600">Projet en cours</p>
+                    <p class="font-semibold text-gray-800" id="project-name">Formation Jeunes 2024</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex space-x-1 overflow-x-auto">
+                <button onclick="showTab('accueil')" class="tab-btn tab-active px-6 py-3 text-sm font-medium rounded-t-lg transition-all">
+                    🏠 Accueil
+                </button>
+                <button onclick="showTab('budget')" class="tab-btn px-6 py-3 text-sm font-medium rounded-t-lg transition-all hover:bg-gray-100">
+                    💰 Budget
+                </button>
+                <button onclick="showTab('cofinancement')" class="tab-btn px-6 py-3 text-sm font-medium rounded-t-lg transition-all hover:bg-gray-100">
+                    🎯 Cofinancement
+                </button>
+                <button onclick="showTab('temps')" class="tab-btn px-6 py-3 text-sm font-medium rounded-t-lg transition-all hover:bg-gray-100">
+                    ⏰ Temps
+                </button>
+                <button onclick="showTab('livrables')" class="tab-btn px-6 py-3 text-sm font-medium rounded-t-lg transition-all hover:bg-gray-100">
+                    📋 Livrables
+                </button>
+                <button onclick="showTab('checklist')" class="tab-btn px-6 py-3 text-sm font-medium rounded-t-lg transition-all hover:bg-gray-100">
+                    ✅ Check-list
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content Container -->
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        
+        <!-- Accueil Tab -->
+        <div id="accueil" class="tab-content">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Construction & Suivi Projet FSE+</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                    Outil interactif pour concevoir, budgétiser et suivre votre projet financé par le Fonds Social Européen Plus
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div onclick="showTab('budget')" class="card-hover bg-white rounded-xl shadow-lg p-6 cursor-pointer transition-all border-l-4 border-orange-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 mlpb-orange rounded-lg flex items-center justify-center mr-4">
+                            <span class="text-2xl">💰</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800">Construction Budgétaire</h3>
+                    </div>
+                    <p class="text-gray-600">Élaborez et visualisez votre budget projet avec répartition automatique</p>
+                </div>
+
+                <div onclick="showTab('cofinancement')" class="card-hover bg-white rounded-xl shadow-lg p-6 cursor-pointer transition-all border-l-4 border-green-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 mlpb-green rounded-lg flex items-center justify-center mr-4">
+                            <span class="text-2xl">🎯</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800">Mise de Départ</h3>
+                    </div>
+                    <p class="text-gray-600">Calculez votre cofinancement et visualisez le retour sur investissement</p>
+                </div>
+
+                <div onclick="showTab('temps')" class="card-hover bg-white rounded-xl shadow-lg p-6 cursor-pointer transition-all border-l-4 border-blue-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 mlpb-blue rounded-lg flex items-center justify-center mr-4">
+                            <span class="text-2xl">⏰</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800">Feuilles de Temps</h3>
+                    </div>
+                    <p class="text-gray-600">Suivez et documentez l'implication RH sur le projet</p>
+                </div>
+
+                <div onclick="showTab('livrables')" class="card-hover bg-white rounded-xl shadow-lg p-6 cursor-pointer transition-all border-l-4 border-pink-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 mlpb-pink rounded-lg flex items-center justify-center mr-4">
+                            <span class="text-2xl">📋</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800">Suivi Livrables</h3>
+                    </div>
+                    <p class="text-gray-600">Tableau Kanban pour organiser et suivre vos actions et indicateurs</p>
+                </div>
+
+                <div onclick="showTab('checklist')" class="card-hover bg-white rounded-xl shadow-lg p-6 cursor-pointer transition-all border-l-4 border-purple-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 mlpb-purple rounded-lg flex items-center justify-center mr-4">
+                            <span class="text-2xl">✅</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800">Check-list Justificatifs</h3>
+                    </div>
+                    <p class="text-gray-600">Vérifiez que tous les justificatifs requis sont collectés</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl shadow-lg p-6 text-white">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-4">
+                            <span class="text-2xl">📊</span>
+                        </div>
+                        <h3 class="text-xl font-semibold">Tableau de Bord</h3>
+                    </div>
+                    <p class="mb-4">Vue d'ensemble de l'avancement</p>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span>Budget utilisé</span>
+                            <span>65%</span>
+                        </div>
+                        <div class="w-full bg-white bg-opacity-20 rounded-full h-2">
+                            <div class="bg-white h-2 rounded-full progress-bar" style="width: 65%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget Tab -->
+        <div id="budget" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Construction Budgétaire</h2>
+                <button onclick="addBudgetLine()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    + Ajouter une ligne
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="bg-gray-50 px-6 py-4 border-b">
+                            <h3 class="font-semibold text-gray-800">Détail du Budget</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Poste de dépense</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">%</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cofinancement</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Justification</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="budget-table" class="divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-4">
+                                            <input type="text" value="Salaires formateurs" class="w-full border-0 bg-transparent focus:ring-0">
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <input type="number" value="35000" class="w-full border rounded px-2 py-1 budget-amount" onchange="updateBudget()">
+                                        </td>
+                                        <td class="px-6 py-4 budget-percent">70%</td>
+                                        <td class="px-6 py-4">
+                                            <input type="number" value="8750" class="w-full border rounded px-2 py-1">
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <input type="text" value="2 formateurs x 6 mois" class="w-full border rounded px-2 py-1">
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <button onclick="removeBudgetLine(this)" class="text-red-500 hover:text-red-700">🗑️</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4">
+                                            <input type="text" value="Prestations externes" class="w-full border-0 bg-transparent focus:ring-0">
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <input type="number" value="10000" class="w-full border rounded px-2 py-1 budget-amount" onchange="updateBudget()">
+                                        </td>
+                                        <td class="px-6 py-4 budget-percent">20%</td>
+                                        <td class="px-6 py-4">
+                                            <input type="number" value="2500" class="w-full border rounded px-2 py-1">
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <input type="text" value="Coaching individuel" class="w-full border rounded px-2 py-1">
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <button onclick="removeBudgetLine(this)" class="text-red-500 hover:text-red-700">🗑️</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4">
+                                            <input type="text" value="Fonctionnement" class="w-full border-0 bg-transparent focus:ring-0">
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <input type="number" value="5000" class="w-full border rounded px-2 py-1 budget-amount" onchange="updateBudget()">
+                                        </td>
+                                        <td class="px-6 py-4 budget-percent">10%</td>
+                                        <td class="px-6 py-4">
+                                            <input type="number" value="1250" class="w-full border rounded px-2 py-1">
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <input type="text" value="Matériel, déplacements" class="w-full border rounded px-2 py-1">
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <button onclick="removeBudgetLine(this)" class="text-red-500 hover:text-red-700">🗑️</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="bg-gray-50 px-6 py-4 border-t">
+                            <div class="flex justify-between font-semibold">
+                                <span>Total Budget:</span>
+                                <span id="total-budget">50 000 €</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="font-semibold text-gray-800 mb-4">Répartition Budgétaire</h3>
+                        <div class="relative">
+                            <canvas id="budget-chart" width="300" height="300"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="font-semibold text-gray-800 mb-4">Indicateurs Clés</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Coût par bénéficiaire</span>
+                                <span class="font-semibold">2 500 €</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Part RH</span>
+                                <span class="font-semibold text-orange-600">70%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Cofinancement requis</span>
+                                <span class="font-semibold text-green-600">25%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cofinancement Tab -->
+        <div id="cofinancement" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Mise de Départ - Cofinancement</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 mlpb-orange rounded-full flex items-center justify-center mr-4">
+                            <span class="text-xl">💰</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-600">Montant Total Projet</h3>
+                            <p class="text-2xl font-bold text-gray-800" id="total-project">50 000 €</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 mlpb-green rounded-full flex items-center justify-center mr-4">
+                            <span class="text-xl">🎯</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-600">Mise = Cofinancement</h3>
+                            <p class="text-2xl font-bold text-gray-800" id="cofinancement-amount">12 500 €</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 mlpb-blue rounded-full flex items-center justify-center mr-4">
+                            <span class="text-xl">🏆</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-600">Gain = Part FSE+</h3>
+                            <p class="text-2xl font-bold text-gray-800" id="fse-amount">37 500 €</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-pink-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 mlpb-pink rounded-full flex items-center justify-center mr-4">
+                            <span class="text-xl">📈</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-600">Ratio Investi/Récupéré</h3>
+                            <p class="text-2xl font-bold text-gray-800" id="ratio">1:3</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <div class="text-center">
+                    <div class="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full mb-6">
+                        <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center">
+                            <span class="text-3xl">🎰</span>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Principe du Cofinancement FSE+</h3>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
+                        Pour chaque euro investi en cofinancement, vous récupérez 3 euros de subvention FSE+. 
+                        C'est un investissement rentable pour développer vos actions !
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                        <div class="text-center">
+                            <div class="w-16 h-16 mlpb-orange rounded-full flex items-center justify-center mx-auto mb-3">
+                                <span class="text-2xl text-white">1️⃣</span>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 mb-2">Vous investissez</h4>
+                            <p class="text-gray-600">25% du budget total en cofinancement</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 mlpb-green rounded-full flex items-center justify-center mx-auto mb-3">
+                                <span class="text-2xl text-white">2️⃣</span>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 mb-2">FSE+ complète</h4>
+                            <p class="text-gray-600">75% du budget via la subvention</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 mlpb-blue rounded-full flex items-center justify-center mx-auto mb-3">
+                                <span class="text-2xl text-white">3️⃣</span>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 mb-2">Vous réalisez</h4>
+                            <p class="text-gray-600">100% de votre projet avec effet levier</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Temps Tab -->
+        <div id="temps" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Feuilles de Temps</h2>
+                <button onclick="addTimeEntry()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    + Nouvelle saisie
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b flex items-center">
+                    <div class="w-8 h-8 mlpb-blue rounded-full flex items-center justify-center mr-3">
+                        <span class="text-white">⏰</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-800">Traçabilité RH - Imputations Projet</h3>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fonction</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mois</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nb heures</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Activité imputée</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Validé</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Signature</th>
+                            </tr>
+                        </thead>
+                        <tbody id="time-table" class="divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4">
+                                    <input type="text" value="Marie Dupont" class="w-full border rounded px-2 py-1">
+                                </td>
+                                <td class="px-6 py-4">
+                                    <input type="text" value="Formatrice" class="w-full border rounded px-2 py-1">
+                                </td>
+                                <td class="px-6 py-4">
+                                    <input type="month" value="2024-01" class="w-full border rounded px-2 py-1">
+                                </td>
+                                <td class="px-6 py-4">
+                                    <input type="number" value="35" class="w-full border rounded px-2 py-1">
+                                </td>
+                                <td class="px-6 py-4">
+                                    <input type="text" value="Animation ateliers CV" class="w-full border rounded px-2 py-1">
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <input type="checkbox" checked class="w-4 h-4 text-blue-600">
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="w-20 h-8 border-2 border-dashed border-gray-300 rounded flex items-center justify-center text-xs text-gray-500">
+                                        Signé
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4">
+                                    <input type="text" value="Jean Martin" class="w-full border rounded px-2 py-1">
+                                </td>
+                                <td class="px-6 py-4">
+                                    <input type="text" value="Conseiller" class="w-full border rounded px-2 py-1">
+                                </td>
+                                <td class="px-6 py-4">
+                                    <input type="month" value="2024-01" class="w-full border rounded px-2 py-1">
+                                </td>
+                                <td class="px-6 py-4">
+                                    <input type="number" value="20" class="w-full border rounded px-2 py-1">
+                                </td>
+                                <td class="px-6 py-4">
+                                    <input type="text" value="Suivi individuel" class="w-full border rounded px-2 py-1">
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <input type="checkbox" class="w-4 h-4 text-blue-600">
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="w-20 h-8 border-2 border-dashed border-gray-300 rounded flex items-center justify-center text-xs text-gray-500">
+                                        À signer
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="bg-gray-50 px-6 py-4 border-t">
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-600">
+                            <span class="font-medium">Total heures imputées:</span> 55h
+                        </div>
+                        <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                            Exporter feuilles de temps
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-start">
+                    <div class="w-6 h-6 text-blue-600 mr-3 mt-0.5">ℹ️</div>
+                    <div>
+                        <h4 class="font-medium text-blue-800 mb-1">Rappel important</h4>
+                        <p class="text-blue-700 text-sm">
+                            Toutes les heures imputées au projet FSE+ doivent être documentées et signées. 
+                            Conservez les feuilles de temps originales pour les contrôles.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Livrables Tab -->
+        <div id="livrables" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Suivi des Livrables et Indicateurs</h2>
+                <button onclick="addDeliverable()" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    + Nouvelle action
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- À faire -->
+                <div class="bg-white rounded-xl shadow-lg">
+                    <div class="bg-gray-100 px-4 py-3 rounded-t-xl border-b">
+                        <h3 class="font-semibold text-gray-800 flex items-center">
+                            <span class="w-3 h-3 bg-gray-400 rounded-full mr-2"></span>
+                            À faire
+                        </h3>
+                    </div>
+                    <div id="todo-column" class="kanban-column p-4 space-y-3 min-h-96">
+                        <div class="kanban-item bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex items-start justify-between mb-2">
+                                <h4 class="font-medium text-gray-800 text-sm">Recrutement participants</h4>
+                                <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">Urgent</span>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-2">Responsable: Marie D.</p>
+                            <p class="text-xs text-gray-600 mb-2">📅 15/02/2024</p>
+                            <div class="flex items-center text-xs text-gray-500">
+                                <span class="mr-2">📋</span>
+                                <span>Liste émargement</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- En cours -->
+                <div class="bg-white rounded-xl shadow-lg">
+                    <div class="bg-blue-100 px-4 py-3 rounded-t-xl border-b">
+                        <h3 class="font-semibold text-gray-800 flex items-center">
+                            <span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                            En cours
+                        </h3>
+                    </div>
+                    <div id="progress-column" class="kanban-column p-4 space-y-3 min-h-96">
+                        <div class="kanban-item bg-white border border-blue-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex items-start justify-between mb-2">
+                                <h4 class="font-medium text-gray-800 text-sm">Formation CV/Lettre</h4>
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">En cours</span>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-2">Responsable: Jean M.</p>
+                            <p class="text-xs text-gray-600 mb-2">📅 20/02/2024</p>
+                            <div class="flex items-center text-xs text-gray-500">
+                                <span class="mr-2">📸</span>
+                                <span>Photos séances</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- À valider -->
+                <div class="bg-white rounded-xl shadow-lg">
+                    <div class="bg-yellow-100 px-4 py-3 rounded-t-xl border-b">
+                        <h3 class="font-semibold text-gray-800 flex items-center">
+                            <span class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></span>
+                            À valider
+                        </h3>
+                    </div>
+                    <div id="review-column" class="kanban-column p-4 space-y-3 min-h-96">
+                        <div class="kanban-item bg-white border border-yellow-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex items-start justify-between mb-2">
+                                <h4 class="font-medium text-gray-800 text-sm">Bilan mi-parcours</h4>
+                                <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Validation</span>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-2">Responsable: Direction</p>
+                            <p class="text-xs text-gray-600 mb-2">📅 25/02/2024</p>
+                            <div class="flex items-center text-xs text-gray-500">
+                                <span class="mr-2">📄</span>
+                                <span>Rapport d'étape</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terminé -->
+                <div class="bg-white rounded-xl shadow-lg">
+                    <div class="bg-green-100 px-4 py-3 rounded-t-xl border-b">
+                        <h3 class="font-semibold text-gray-800 flex items-center">
+                            <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                            Terminé
+                        </h3>
+                    </div>
+                    <div id="done-column" class="kanban-column p-4 space-y-3 min-h-96">
+                        <div class="kanban-item bg-white border border-green-200 rounded-lg p-4 shadow-sm">
+                            <div class="flex items-start justify-between mb-2">
+                                <h4 class="font-medium text-gray-800 text-sm">Diagnostic initial</h4>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">✓ Fait</span>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-2">Responsable: Marie D.</p>
+                            <p class="text-xs text-gray-600 mb-2">📅 10/01/2024</p>
+                            <div class="flex items-center text-xs text-gray-500">
+                                <span class="mr-2">✅</span>
+                                <span>20 participants</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 bg-pink-50 border border-pink-200 rounded-lg p-4">
+                <div class="flex items-start">
+                    <div class="w-6 h-6 text-pink-600 mr-3 mt-0.5">💡</div>
+                    <div>
+                        <h4 class="font-medium text-pink-800 mb-1">Types de preuves à collecter</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                            <div class="flex items-center text-pink-700 text-sm">
+                                <span class="mr-2">📄</span>
+                                <span>Feuilles d'émargement</span>
+                            </div>
+                            <div class="flex items-center text-pink-700 text-sm">
+                                <span class="mr-2">📸</span>
+                                <span>Photos des séances</span>
+                            </div>
+                            <div class="flex items-center text-pink-700 text-sm">
+                                <span class="mr-2">📋</span>
+                                <span>Bilans individuels</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checklist Tab -->
+        <div id="checklist" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Check-list des Justificatifs</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="space-y-6">
+                    <!-- RH -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="bg-orange-100 px-6 py-4 border-b border-orange-200">
+                            <h3 class="font-semibold text-gray-800 flex items-center">
+                                <span class="w-6 h-6 mlpb-orange rounded-full flex items-center justify-center text-white text-sm mr-3">👥</span>
+                                Ressources Humaines
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" checked class="w-4 h-4 text-orange-600 mr-3">
+                                <span class="text-gray-700">Fiches de poste détaillées</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" checked class="w-4 h-4 text-orange-600 mr-3">
+                                <span class="text-gray-700">Contrats de travail</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-orange-600 mr-3">
+                                <span class="text-gray-700">Feuilles de temps signées</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-orange-600 mr-3">
+                                <span class="text-gray-700">Bulletins de salaire</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-orange-600 mr-3">
+                                <span class="text-gray-700">Déclarations sociales</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Prestations -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="bg-green-100 px-6 py-4 border-b border-green-200">
+                            <h3 class="font-semibold text-gray-800 flex items-center">
+                                <span class="w-6 h-6 mlpb-green rounded-full flex items-center justify-center text-white text-sm mr-3">🤝</span>
+                                Prestations Externes
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" checked class="w-4 h-4 text-green-600 mr-3">
+                                <span class="text-gray-700">Devis détaillés</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-green-600 mr-3">
+                                <span class="text-gray-700">Factures acquittées</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-green-600 mr-3">
+                                <span class="text-gray-700">Preuves de réalisation</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-green-600 mr-3">
+                                <span class="text-gray-700">Rapports d'intervention</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Fonctionnement -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="bg-blue-100 px-6 py-4 border-b border-blue-200">
+                            <h3 class="font-semibold text-gray-800 flex items-center">
+                                <span class="w-6 h-6 mlpb-blue rounded-full flex items-center justify-center text-white text-sm mr-3">⚙️</span>
+                                Fonctionnement
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-blue-600 mr-3">
+                                <span class="text-gray-700">Notes de frais</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-blue-600 mr-3">
+                                <span class="text-gray-700">Justificatifs déplacements</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-blue-600 mr-3">
+                                <span class="text-gray-700">Factures matériel</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-blue-600 mr-3">
+                                <span class="text-gray-700">Locations salles</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Indicateurs -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="bg-pink-100 px-6 py-4 border-b border-pink-200">
+                            <h3 class="font-semibold text-gray-800 flex items-center">
+                                <span class="w-6 h-6 mlpb-pink rounded-full flex items-center justify-center text-white text-sm mr-3">📊</span>
+                                Indicateurs & Preuves
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" checked class="w-4 h-4 text-pink-600 mr-3">
+                                <span class="text-gray-700">Feuilles d'émargement</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-pink-600 mr-3">
+                                <span class="text-gray-700">Bilans individuels jeunes</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-pink-600 mr-3">
+                                <span class="text-gray-700">Attestations de formation</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-pink-600 mr-3">
+                                <span class="text-gray-700">Photos des séances</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-pink-600 mr-3">
+                                <span class="text-gray-700">Questionnaires satisfaction</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Communication -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="bg-purple-100 px-6 py-4 border-b border-purple-200">
+                            <h3 class="font-semibold text-gray-800 flex items-center">
+                                <span class="w-6 h-6 mlpb-purple rounded-full flex items-center justify-center text-white text-sm mr-3">📢</span>
+                                Communication
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" checked class="w-4 h-4 text-purple-600 mr-3">
+                                <span class="text-gray-700">Logo UE sur supports</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" checked class="w-4 h-4 text-purple-600 mr-3">
+                                <span class="text-gray-700">Logo FSE+ visible</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-purple-600 mr-3">
+                                <span class="text-gray-700">Mentions obligatoires</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="w-4 h-4 text-purple-600 mr-3">
+                                <span class="text-gray-700">Site web actualisé</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Synthèse -->
+                    <div class="bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl shadow-lg p-6 text-white">
+                        <h3 class="font-semibold mb-4 flex items-center">
+                            <span class="mr-3">📈</span>
+                            Avancement Global
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-sm">
+                                <span>Justificatifs collectés</span>
+                                <span id="completion-rate">45%</span>
+                            </div>
+                            <div class="w-full bg-white bg-opacity-20 rounded-full h-3">
+                                <div class="bg-white h-3 rounded-full progress-bar" style="width: 45%"></div>
+                            </div>
+                            <p class="text-sm opacity-90 mt-4">
+                                <strong>9/20</strong> justificatifs collectés
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                <div class="flex items-start">
+                    <div class="w-8 h-8 text-yellow-600 mr-4 mt-1">⚠️</div>
+                    <div>
+                        <h4 class="font-medium text-yellow-800 mb-2">Rappels importants</h4>
+                        <ul class="text-yellow-700 text-sm space-y-1">
+                            <li>• Tous les justificatifs doivent être conservés pendant 10 ans</li>
+                            <li>• Les logos UE et FSE+ sont obligatoires sur tous les supports</li>
+                            <li>• Les feuilles de temps doivent être signées mensuellement</li>
+                            <li>• Prévoir un contrôle sur place possible à tout moment</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Tab Management
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('hover:bg-gray-100');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.classList.add('tab-active');
+            event.target.classList.remove('hover:bg-gray-100');
+            
+            // Initialize chart if budget tab is shown
+            if (tabName === 'budget') {
+                setTimeout(initBudgetChart, 100);
+            }
+        }
+
+        // Budget Management
+        function updateBudget() {
+            const amounts = document.querySelectorAll('.budget-amount');
+            let total = 0;
+            
+            amounts.forEach((input, index) => {
+                const value = parseFloat(input.value) || 0;
+                total += value;
+                
+                // Update percentage
+                const percentCell = document.querySelectorAll('.budget-percent')[index];
+                if (percentCell && total > 0) {
+                    const percent = Math.round((value / total) * 100);
+                    percentCell.textContent = percent + '%';
+                }
+            });
+            
+            document.getElementById('total-budget').textContent = total.toLocaleString() + ' €';
+            
+            // Update cofinancement tab values
+            document.getElementById('total-project').textContent = total.toLocaleString() + ' €';
+            document.getElementById('cofinancement-amount').textContent = Math.round(total * 0.25).toLocaleString() + ' €';
+            document.getElementById('fse-amount').textContent = Math.round(total * 0.75).toLocaleString() + ' €';
+            
+            updateBudgetChart();
+        }
+
+        function addBudgetLine() {
+            const tbody = document.getElementById('budget-table');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td class="px-6 py-4">
+                    <input type="text" placeholder="Nouveau poste" class="w-full border-0 bg-transparent focus:ring-0">
+                </td>
+                <td class="px-6 py-4">
+                    <input type="number" value="0" class="w-full border rounded px-2 py-1 budget-amount" onchange="updateBudget()">
+                </td>
+                <td class="px-6 py-4 budget-percent">0%</td>
+                <td class="px-6 py-4">
+                    <input type="number" value="0" class="w-full border rounded px-2 py-1">
+                </td>
+                <td class="px-6 py-4">
+                    <input type="text" placeholder="Justification" class="w-full border rounded px-2 py-1">
+                </td>
+                <td class="px-6 py-4">
+                    <button onclick="removeBudgetLine(this)" class="text-red-500 hover:text-red-700">🗑️</button>
+                </td>
+            `;
+            tbody.appendChild(newRow);
+        }
+
+        function removeBudgetLine(button) {
+            button.closest('tr').remove();
+            updateBudget();
+        }
+
+        // Chart Management
+        let budgetChart = null;
+
+        function initBudgetChart() {
+            const ctx = document.getElementById('budget-chart');
+            if (!ctx) return;
+            
+            if (budgetChart) {
+                budgetChart.destroy();
+            }
+            
+            budgetChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['RH', 'Prestations', 'Fonctionnement'],
+                    datasets: [{
+                        data: [70, 20, 10],
+                        backgroundColor: ['#FF6B35', '#4CAF50', '#2196F3'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateBudgetChart() {
+            if (!budgetChart) return;
+            
+            const amounts = document.querySelectorAll('.budget-amount');
+            const data = [];
+            let total = 0;
+            
+            amounts.forEach(input => {
+                const value = parseFloat(input.value) || 0;
+                data.push(value);
+                total += value;
+            });
+            
+            if (total > 0) {
+                const percentages = data.map(value => Math.round((value / total) * 100));
+                budgetChart.data.datasets[0].data = percentages;
+                budgetChart.update();
+            }
+        }
+
+        // Time Management
+        function addTimeEntry() {
+            const tbody = document.getElementById('time-table');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td class="px-6 py-4">
+                    <input type="text" placeholder="Nom" class="w-full border rounded px-2 py-1">
+                </td>
+                <td class="px-6 py-4">
+                    <input type="text" placeholder="Fonction" class="w-full border rounded px-2 py-1">
+                </td>
+                <td class="px-6 py-4">
+                    <input type="month" class="w-full border rounded px-2 py-1">
+                </td>
+                <td class="px-6 py-4">
+                    <input type="number" placeholder="0" class="w-full border rounded px-2 py-1">
+                </td>
+                <td class="px-6 py-4">
+                    <input type="text" placeholder="Activité" class="w-full border rounded px-2 py-1">
+                </td>
+                <td class="px-6 py-4 text-center">
+                    <input type="checkbox" class="w-4 h-4 text-blue-600">
+                </td>
+                <td class="px-6 py-4">
+                    <div class="w-20 h-8 border-2 border-dashed border-gray-300 rounded flex items-center justify-center text-xs text-gray-500">
+                        À signer
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(newRow);
+        }
+
+        // Deliverables Management
+        function addDeliverable() {
+            const column = document.getElementById('todo-column');
+            const newItem = document.createElement('div');
+            newItem.className = 'kanban-item bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow';
+            newItem.innerHTML = `
+                <div class="flex items-start justify-between mb-2">
+                    <h4 class="font-medium text-gray-800 text-sm">Nouvelle action</h4>
+                    <span class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">Nouveau</span>
+                </div>
+                <p class="text-xs text-gray-600 mb-2">Responsable: À définir</p>
+                <p class="text-xs text-gray-600 mb-2">📅 À planifier</p>
+                <div class="flex items-center text-xs text-gray-500">
+                    <span class="mr-2">📋</span>
+                    <span>Livrable à définir</span>
+                </div>
+            `;
+            column.appendChild(newItem);
+        }
+
+        // Checklist Management
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            
+            function updateCompletionRate() {
+                const checklistCheckboxes = document.querySelectorAll('#checklist input[type="checkbox"]');
+                const checked = document.querySelectorAll('#checklist input[type="checkbox"]:checked').length;
+                const total = checklistCheckboxes.length;
+                const rate = Math.round((checked / total) * 100);
+                
+                const rateElement = document.getElementById('completion-rate');
+                if (rateElement) {
+                    rateElement.textContent = rate + '%';
+                    const progressBar = rateElement.closest('.bg-gradient-to-br').querySelector('.progress-bar');
+                    if (progressBar) {
+                        progressBar.style.width = rate + '%';
+                    }
+                }
+            }
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateCompletionRate);
+            });
+            
+            updateCompletionRate();
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBudget();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98525fbe45692a7c',t:'MTc1ODg4NTY0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
